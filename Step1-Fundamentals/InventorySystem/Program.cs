@@ -14,18 +14,24 @@ namespace InventorySystem
 
         public void AdicionarItem(Item novoItem)
         {
-            // 1. Verifica se já existe esse item na lista
+            
+            if (novoItem == null)
+            {
+                throw new ArgumentNullException(nameof(novoItem));
+            }
+
+            // Verifica se já existe esse item na lista
             Item itemExistente = _itens.FirstOrDefault(item => item.Nome == novoItem.Nome);
 
             if (itemExistente != null)
             {
-                // 2. Se existe, só soma a quantidade. Não ocupa slot novo
+                // Se existe, só soma a quantidade. Não ocupa slot novo
                 itemExistente.AdicionarQuantidade(novoItem.Quantidade);
                 Console.WriteLine($"Adicionado +{novoItem.Quantidade} {novoItem.Nome}. Total: {itemExistente.Quantidade}");
             }
             else
             {
-                // 3. Se NÃO existe, aí sim verifica capacidade e adiciona
+                // Se NÃO existe, aí sim verifica capacidade e adiciona
                 if (_itens.Count >= _capacidadeMaxima)
                 {
                     Console.WriteLine("Inventário Cheio!");
@@ -97,6 +103,23 @@ namespace InventorySystem
 
         public Item(string nome, int quantidade)
         {
+            if (quantidade <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(quantidade),
+                    "A quantidade inicial deve ser maior que zero.");
+            }
+
+            if(nome == null)
+            {
+                throw new ArgumentNullException(nameof(nome));
+            }
+
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                throw new ArgumentException( "O nome do item não pode ficar vazio ou conter somente espaços.", nameof(nome));
+            }
+
             Nome = nome;
             Quantidade = quantidade;
         }
@@ -111,6 +134,13 @@ namespace InventorySystem
 
         public void AdicionarQuantidade(int qtd)
         {
+            if (qtd <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(qtd),
+                    "A quantidade adicionada deve ser maior que zero");
+            }
+
             Quantidade += qtd;
         }
     }
@@ -138,6 +168,25 @@ namespace InventorySystem
             meuInventario.UsarItem("Poção de Vida");
 
             meuInventario.MostrarInventario();
+
+            // TESTE DE EXCESSÃO
+            try
+            {
+                meuInventario.AdicionarItem(new Item("Poção de Vida", 0));
+            }
+            catch (ArgumentOutOfRangeException erro)
+            {
+                Console.WriteLine($"Validação confirmada - parâmetro {erro.ParamName}: {erro.Message}");
+            }
+
+            try
+            {
+                meuInventario.AdicionarItem(null);
+            }
+            catch(ArgumentNullException erro)
+            {
+                Console.WriteLine($"Validação confirmada - parâmetro {erro.ParamName}: {erro.Message}");
+            }
         }
     }
 }
